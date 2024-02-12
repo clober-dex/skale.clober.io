@@ -8,7 +8,6 @@ import { GAS_PROTECTION } from '../../constants/gas'
 import { useTransactionContext } from '../transaction-context'
 import { formatUnits } from '../../utils/bigint'
 import { Market } from '../../model/market'
-import { writeContract } from '../../utils/wallet'
 import { CHAIN_IDS } from '../../constants/chain'
 import { CONTRACT_ADDRESSES } from '../../constants/addresses'
 import { approve20 } from '../../utils/approve20'
@@ -146,8 +145,8 @@ export const LimitContractProvider = ({
           baseAmount: isBid ? 0n : baseAmount,
         }
 
-        if (withClaim) {
-          await writeContract(publicClient, walletClient, {
+        if (withClaim && claimParamsList) {
+          await walletClient.writeContract({
             address: marketRouter,
             abi: MARKET_ROUTER_ABI,
             functionName: isBid ? 'limitBidAfterClaim' : 'limitAskAfterClaim',
@@ -155,7 +154,7 @@ export const LimitContractProvider = ({
             value,
           })
         } else {
-          await writeContract(publicClient, walletClient, {
+          await walletClient.writeContract({
             address: marketRouter,
             abi: MARKET_ROUTER_ABI,
             functionName: isBid ? 'limitBid' : 'limitAsk',
@@ -212,7 +211,7 @@ export const LimitContractProvider = ({
           })),
         })
 
-        await writeContract(publicClient, walletClient, {
+        await walletClient.writeContract({
           address:
             CONTRACT_ADDRESSES[selectedChain.id as CHAIN_IDS].MarketRouter,
           abi: MARKET_ROUTER_ABI,
@@ -270,7 +269,7 @@ export const LimitContractProvider = ({
           })),
         })
 
-        await writeContract(publicClient, walletClient, {
+        await walletClient.writeContract({
           address:
             CONTRACT_ADDRESSES[selectedChain.id as CHAIN_IDS].OrderCanceler,
           abi: ORDER_CANCELER_ABI,

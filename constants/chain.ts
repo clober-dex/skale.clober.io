@@ -7,15 +7,19 @@ export const supportChains: Chain[] =
     ? [
         {
           ...skaleEuropaTestnet,
+          name: 'SKALE Europa',
           defaultGasPrice: 0n,
           expireIn: 240,
+          icon: '/skale.png',
         },
       ]
     : [
         {
           ...skaleEuropaTestnet,
+          name: 'SKALE Europa',
           defaultGasPrice: 0n,
           expireIn: 240,
+          icon: '/skale.png',
         },
       ]
 
