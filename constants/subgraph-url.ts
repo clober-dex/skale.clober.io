@@ -4,5 +4,5 @@ export const SUBGRAPH_URL: {
   [chain in CHAIN_IDS]: string
 } = {
   [CHAIN_IDS.SKALE_EUROPA_TESTNET]:
-    'https://dev-skale.clober-api.com/subgraphs/name/core-v1-subgraph',
+    'https://dev-skale-graph-node.clober-api.com/subgraphs/name/core-v1-subgraph',
 }
