@@ -1,4 +1,4 @@
-import { Chain as WagmiChain } from 'wagmi'
+import { Chain as WagmiChain } from 'viem'
 
 export type Chain = WagmiChain & {
   expireIn: number
@@ -10,7 +10,6 @@ export const toWagmiChain = (chain: Chain): WagmiChain => {
   return {
     id: chain.id,
     name: chain.name,
-    network: chain.network,
     nativeCurrency: chain.nativeCurrency,
     rpcUrls: chain.rpcUrls,
     blockExplorers: chain.blockExplorers,

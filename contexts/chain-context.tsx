@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect } from 'react'
-import { useNetwork, useSwitchNetwork } from 'wagmi'
+import { skaleEuropaTestnet } from 'viem/chains'
+import { useAccount, useSwitchChain } from 'wagmi'
 
 import { Chain } from '../model/chain'
 import { findSupportChain, supportChains } from '../constants/chain'
@@ -11,7 +12,9 @@ type ChainContext = {
 }
 
 const Context = React.createContext<ChainContext>({
-  selectedChain: supportChains.find((chain) => chain.id === 42161)!,
+  selectedChain: supportChains.find(
+    (chain) => chain.id === skaleEuropaTestnet.id,
+  )!,
   setSelectedChain: (_) => _,
 })
 
@@ -19,16 +22,18 @@ const LOCAL_STORAGE_CHAIN_KEY = 'chain'
 const QUERY_PARAM_CHAIN_KEY = 'chain'
 
 export const ChainProvider = ({ children }: React.PropsWithChildren<{}>) => {
-  const { chain: connectedChain } = useNetwork()
+  const { chain: connectedChain } = useAccount()
   const [selectedChain, _setSelectedChain] = React.useState<Chain>(
     supportChains[0],
   )
-  const { switchNetwork } = useSwitchNetwork({
-    onSuccess(data) {
-      const chain = findSupportChain(data.id)
-      if (chain) {
-        _setSelectedChain(chain)
-      }
+  const { switchChain } = useSwitchChain({
+    mutation: {
+      onSuccess(data) {
+        const chain = findSupportChain(data.id)
+        if (chain) {
+          _setSelectedChain(chain)
+        }
+      },
     },
   })
 
@@ -52,8 +57,8 @@ export const ChainProvider = ({ children }: React.PropsWithChildren<{}>) => {
         LOCAL_STORAGE_CHAIN_KEY,
         queryParamChain.id.toString(),
       )
-      if (switchNetwork) {
-        switchNetwork(queryParamChain.id)
+      if (switchChain) {
+        switchChain({ chainId: queryParamChain.id })
       }
       setQueryParams({
         chain: queryParamChain.id.toString(),
@@ -72,15 +77,15 @@ export const ChainProvider = ({ children }: React.PropsWithChildren<{}>) => {
       setQueryParams({
         chain: localStorageChain.id.toString(),
       })
-      if (switchNetwork) {
-        switchNetwork(localStorageChain.id)
+      if (switchChain) {
+        switchChain({ chainId: localStorageChain.id })
       }
     } else {
       setQueryParams({
         chain: supportChains[0].id.toString(),
       })
     }
-  }, [connectedChain, switchNetwork])
+  }, [connectedChain, switchChain])
 
   const setSelectedChain = useCallback(
     (_chain: Chain) => {
@@ -89,11 +94,11 @@ export const ChainProvider = ({ children }: React.PropsWithChildren<{}>) => {
       setQueryParams({
         chain: _chain.id.toString(),
       })
-      if (switchNetwork) {
-        switchNetwork(_chain.id)
+      if (switchChain) {
+        switchChain({ chainId: _chain.id })
       }
     },
-    [switchNetwork],
+    [switchChain],
   )
 
   return (

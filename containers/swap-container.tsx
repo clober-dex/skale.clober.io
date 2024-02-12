@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { parseUnits, zeroAddress } from 'viem'
-import { useAccount, useFeeData, useQuery } from 'wagmi'
+import { useAccount, useFeeData } from 'wagmi'
+import { useQuery } from '@tanstack/react-query'
 
 import { SwapForm } from '../components/form/swap-form'
 import { useChainContext } from '../contexts/chain-context'
@@ -34,8 +35,8 @@ export const SwapContainer = () => {
   const [showOutputCurrencySelect, setShowOutputCurrencySelect] =
     useState(false)
 
-  const { data } = useQuery(
-    [
+  const { data } = useQuery({
+    queryKey: [
       'quotes',
       inputCurrency,
       outputCurrency,
@@ -44,7 +45,7 @@ export const SwapContainer = () => {
       userAddress,
       selectedChain,
     ],
-    async () => {
+    queryFn: async () => {
       if (
         feeData &&
         feeData.gasPrice &&
@@ -63,7 +64,7 @@ export const SwapContainer = () => {
         )
       }
     },
-  )
+  })
 
   useEffect(() => {
     setShowInputCurrencySelect(false)

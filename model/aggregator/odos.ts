@@ -1,5 +1,4 @@
-import { getAddress } from 'viem'
-import { Chain } from 'wagmi'
+import { getAddress, Chain } from 'viem'
 
 import { Currency } from '../currency'
 import { fetchApi } from '../../apis/utils'

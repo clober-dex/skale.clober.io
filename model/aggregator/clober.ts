@@ -1,4 +1,5 @@
 import {
+  Chain,
   encodeFunctionData,
   getAddress,
   isAddressEqual,
@@ -7,7 +8,6 @@ import {
 } from 'viem'
 import qs from 'qs'
 import BigNumber from 'bignumber.js'
-import { Chain } from 'wagmi'
 
 import { Currency } from '../currency'
 import { fetchApi } from '../../apis/utils'

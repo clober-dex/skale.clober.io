@@ -4,11 +4,10 @@ import {
   SimulateContractParameters,
   WriteContractParameters,
 } from 'viem'
-import { GetWalletClientResult } from '@wagmi/core'
 
 export async function writeContract(
   publicClient: PublicClient,
-  walletClient: GetWalletClientResult,
+  walletClient: any,
   args: WriteContractParameters | SimulateContractParameters,
 ): Promise<Hash | undefined> {
   if (!walletClient) {

@@ -1,6 +1,7 @@
 import React, { useMemo } from 'react'
-import { useAccount, useQuery } from 'wagmi'
+import { useAccount } from 'wagmi'
 import { getAddress } from 'viem'
+import { useQuery } from '@tanstack/react-query'
 
 import { OpenOrder } from '../../model/open-order'
 import { fetchOpenOrders } from '../../apis/open-orders'
@@ -33,15 +34,14 @@ export const OpenOrderProvider = ({
   const { address: userAddress } = useAccount()
   const { selectedChain } = useChainContext()
 
-  const { data: openOrders } = useQuery(
-    ['open-orders', selectedChain, userAddress],
-    () => (userAddress ? fetchOpenOrders(selectedChain.id, userAddress) : []),
-    {
-      refetchIntervalInBackground: true,
-      refetchInterval: 10 * 1000,
-      initialData: [],
-    },
-  )
+  const { data: openOrders } = useQuery({
+    queryKey: ['open-orders', selectedChain.id, userAddress],
+    queryFn: () =>
+      userAddress ? fetchOpenOrders(selectedChain.id, userAddress) : [],
+    refetchIntervalInBackground: true,
+    refetchInterval: 10 * 1000,
+    initialData: [],
+  })
   const claimable = useMemo(
     () =>
       openOrders.reduce((acc, openOrder) => {

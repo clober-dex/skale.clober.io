@@ -1,6 +1,6 @@
-import React from 'react'
-import { useAccount, useBalance, useQuery } from 'wagmi'
-import { readContracts } from '@wagmi/core'
+import React, { useMemo } from 'react'
+import { useAccount, useBalance, useReadContracts } from 'wagmi'
+import { useQuery } from '@tanstack/react-query'
 import { getAddress, zeroAddress } from 'viem'
 
 import { Balances } from '../../model/balances'
@@ -23,28 +23,37 @@ export const LimitCurrencyProvider = ({
   const { data: balance } = useBalance({ address: userAddress })
   const { markets } = useMarketContext()
 
-  const { data: balances } = useQuery(
-    ['limit-balances', userAddress, balance, markets],
-    async () => {
-      if (!userAddress) {
+  const uniqueCurrencies = useMemo(() => {
+    return [
+      ...markets.map((market) => market.quoteToken),
+      ...markets.map((market) => market.baseToken),
+    ].filter(
+      (currency, index, self) =>
+        self.findIndex((c) => c.address === currency.address) === index,
+    )
+  }, [markets])
+
+  const results = useReadContracts({
+    contracts: uniqueCurrencies.map((currency) => ({
+      address: currency.address,
+      abi: ERC20_PERMIT_ABI,
+      functionName: 'balanceOf',
+      args: [userAddress],
+    })),
+  })
+
+  const { data: balances } = useQuery({
+    queryKey: [
+      'limit-balances',
+      userAddress,
+      balance ? balance.value.toString() : '0',
+      uniqueCurrencies,
+    ],
+    queryFn: async () => {
+      if (!userAddress || !results.data) {
         return {}
       }
-      const uniqueCurrencies = [
-        ...markets.map((market) => market.quoteToken),
-        ...markets.map((market) => market.baseToken),
-      ].filter(
-        (currency, index, self) =>
-          self.findIndex((c) => c.address === currency.address) === index,
-      )
-      const results = await readContracts({
-        contracts: uniqueCurrencies.map((currency) => ({
-          address: currency.address,
-          abi: ERC20_PERMIT_ABI,
-          functionName: 'balanceOf',
-          args: [userAddress],
-        })),
-      })
-      return results.reduce(
+      return results.data.reduce(
         (acc: {}, { result }, index: number) => {
           const currency = uniqueCurrencies[index]
           return {
@@ -57,11 +66,9 @@ export const LimitCurrencyProvider = ({
         },
       )
     },
-    {
-      refetchInterval: 10 * 1000,
-      refetchIntervalInBackground: true,
-    },
-  ) as { data: Balances }
+    refetchInterval: 10 * 1000,
+    refetchIntervalInBackground: true,
+  }) as { data: Balances }
 
   return (
     <Context.Provider

@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect } from 'react'
-import { useQuery } from 'wagmi'
 import { getAddress, isAddressEqual } from 'viem'
+import { useQuery } from '@tanstack/react-query'
 
 import { Market } from '../../model/market'
 import { fetchMarkets } from '../../apis/market'
@@ -25,17 +25,15 @@ const QUERY_PARAM_MARKET_KEY = 'market'
 export const MarketProvider = ({ children }: React.PropsWithChildren<{}>) => {
   const { selectedChain } = useChainContext()
 
-  const { data: markets } = useQuery(
-    ['markets', selectedChain],
-    async () => {
+  const { data: markets } = useQuery({
+    queryKey: ['markets', selectedChain.id],
+    queryFn: async () => {
       return fetchMarkets(selectedChain.id)
     },
-    {
-      initialData: [],
-      refetchInterval: 2000,
-      refetchIntervalInBackground: true,
-    },
-  )
+    initialData: [],
+    refetchInterval: 2000,
+    refetchIntervalInBackground: true,
+  })
 
   const [selectedMarket, _setSelectedMarket] = React.useState<
     Market | undefined

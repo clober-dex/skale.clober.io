@@ -1,6 +1,7 @@
 import React, { useCallback } from 'react'
 import { isAddressEqual, zeroAddress } from 'viem'
-import { useQueryClient, useWalletClient } from 'wagmi'
+import { useWalletClient } from 'wagmi'
+import { useQueryClient } from '@tanstack/react-query'
 
 import { Currency } from '../../model/currency'
 import { formatUnits } from '../../utils/bigint'
@@ -120,7 +121,7 @@ export const SwapContractProvider = ({
       } catch (e) {
         console.error(e)
       } finally {
-        await queryClient.invalidateQueries(['swap-balances'])
+        await queryClient.invalidateQueries({ queryKey: ['swap-balances'] })
         setConfirmation(undefined)
       }
     },

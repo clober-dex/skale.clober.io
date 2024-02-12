@@ -1,4 +1,4 @@
-import { createPublicClient, http } from 'viem'
+import { createPublicClient, webSocket } from 'viem'
 
 import { Currency } from '../model/currency'
 import { CHAIN_IDS, supportChains } from '../constants/chain'
@@ -12,7 +12,7 @@ export async function fetchAllowance(
 ): Promise<bigint> {
   const publicClient = createPublicClient({
     chain: supportChains.find((chain) => chain.id === chainId),
-    transport: http(),
+    transport: webSocket(),
   })
   const [{ result: allowance }] = await publicClient.multicall({
     contracts: [

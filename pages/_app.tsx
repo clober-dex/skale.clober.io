@@ -3,23 +3,23 @@ import '../styles/globals.css'
 import '@rainbow-me/rainbowkit/styles.css'
 import {
   darkTheme,
-  getDefaultWallets,
+  getDefaultConfig,
   RainbowKitProvider,
 } from '@rainbow-me/rainbowkit'
 import Head from 'next/head'
 import type { AppProps } from 'next/app'
-import { configureChains, createConfig, useAccount, WagmiConfig } from 'wagmi'
-import { publicProvider } from 'wagmi/providers/public'
+import { useAccount, WagmiConfig } from 'wagmi'
 import { identify } from '@web3analytic/funnel-sdk'
 import dynamic from 'next/dynamic'
 import { useRouter } from 'next/router'
+import { skaleEuropaTestnet } from 'viem/chains'
+import { webSocket } from 'viem'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 
 import HeaderContainer from '../containers/header-container'
 import Footer from '../components/footer'
 import { ChainProvider, useChainContext } from '../contexts/chain-context'
 import { MarketProvider } from '../contexts/limit/market-context'
-import { supportChains } from '../constants/chain'
-import { toWagmiChain } from '../model/chain'
 import { TransactionProvider } from '../contexts/transaction-context'
 import { LimitProvider } from '../contexts/limit/limit-context'
 import { SwapProvider } from '../contexts/swap/swap-context'
@@ -29,30 +29,23 @@ import { SwapCurrencyProvider } from '../contexts/swap/swap-currency-context'
 import { LimitContractProvider } from '../contexts/limit/limit-contract-context'
 import { SwapContractProvider } from '../contexts/swap/swap-contract-context'
 
-const { chains, publicClient, webSocketPublicClient } = configureChains(
-  supportChains.map((chain) => toWagmiChain(chain)),
-  [publicProvider()],
-)
-
-const { connectors } = getDefaultWallets({
+const wagmiConfig = getDefaultConfig({
   appName: 'Clober Dex',
   projectId: '14e09398dd595b0d1dccabf414ac4531',
-  chains,
+  chains: [skaleEuropaTestnet],
+  transports: {
+    [skaleEuropaTestnet.id]: webSocket(),
+  },
 })
 
-const wagmiConfig = createConfig({
-  autoConnect: true,
-  connectors,
-  publicClient,
-  webSocketPublicClient,
-})
+const queryClient = new QueryClient()
 
 const WalletProvider = ({ children }: React.PropsWithChildren) => {
   return (
     <WagmiConfig config={wagmiConfig}>
-      <RainbowKitProvider chains={supportChains} theme={darkTheme()}>
-        {children}
-      </RainbowKitProvider>
+      <QueryClientProvider client={queryClient}>
+        <RainbowKitProvider theme={darkTheme()}>{children}</RainbowKitProvider>
+      </QueryClientProvider>
     </WagmiConfig>
   )
 }
@@ -114,12 +107,7 @@ const MainComponentWrapper = ({ children }: React.PropsWithChildren) => {
           </button>
           <button
             className="flex font-bold items-center justify-center text-base sm:text-2xl w-16 sm:w-[120px] bg-transparent text-gray-500 disabled:text-white border-0 rounded-none p-2 border-b-4 border-b-transparent border-t-4 border-t-transparent disabled:border-b-white"
-            disabled={router.pathname === '/swap'}
-            onClick={() =>
-              router.replace(`/swap?chain=${selectedChain.id}`, undefined, {
-                shallow: true,
-              })
-            }
+            disabled={false}
           >
             Swap
           </button>

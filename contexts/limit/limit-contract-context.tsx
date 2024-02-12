@@ -1,5 +1,6 @@
 import React, { useCallback } from 'react'
-import { usePublicClient, useQueryClient, useWalletClient } from 'wagmi'
+import { usePublicClient, useWalletClient } from 'wagmi'
+import { useQueryClient } from '@tanstack/react-query'
 
 import { calculateValue } from '../../utils/order-book'
 import { useChainContext } from '../chain-context'
@@ -71,7 +72,7 @@ export const LimitContractProvider = ({
       if (rawAmount > 0n && baseAmount > 0n) {
         throw new Error('Cannot have both rawAmount and baseAmount')
       }
-      if (!walletClient || !selectedChain) {
+      if (!walletClient || !selectedChain || !publicClient) {
         return
       }
       const isBid = rawAmount > 0n
@@ -166,9 +167,15 @@ export const LimitContractProvider = ({
         console.error(e)
       } finally {
         await Promise.all([
-          queryClient.invalidateQueries(['limit-balances']),
-          queryClient.invalidateQueries(['open-orders']),
-          queryClient.invalidateQueries(['markets']),
+          queryClient.invalidateQueries({
+            queryKey: ['limit-balances'],
+          }),
+          queryClient.invalidateQueries({
+            queryKey: ['open-orders'],
+          }),
+          queryClient.invalidateQueries({
+            queryKey: ['markets'],
+          }),
         ])
         setConfirmation(undefined)
       }
@@ -188,7 +195,7 @@ export const LimitContractProvider = ({
       tokenAndAmounts: { token: Currency; amount: bigint }[],
       claimParamsList: ClaimParamsList,
     ) => {
-      if (!walletClient) {
+      if (!walletClient || !publicClient) {
         return
       }
 
@@ -221,8 +228,12 @@ export const LimitContractProvider = ({
         console.error(e)
       } finally {
         await Promise.all([
-          queryClient.invalidateQueries(['limit-balances']),
-          queryClient.invalidateQueries(['open-orders']),
+          queryClient.invalidateQueries({
+            queryKey: ['limit-balances'],
+          }),
+          queryClient.invalidateQueries({
+            queryKey: ['open-orders'],
+          }),
         ])
         setConfirmation(undefined)
       }
@@ -242,7 +253,7 @@ export const LimitContractProvider = ({
       tokenAndAmounts: { token: Currency; amount: bigint }[],
       cancelParamsList: CancelParamsList,
     ) => {
-      if (!walletClient) {
+      if (!walletClient || !publicClient) {
         return
       }
 
@@ -270,8 +281,12 @@ export const LimitContractProvider = ({
         console.error(e)
       } finally {
         await Promise.all([
-          queryClient.invalidateQueries(['limit-balances']),
-          queryClient.invalidateQueries(['open-orders']),
+          queryClient.invalidateQueries({
+            queryKey: ['limit-balances'],
+          }),
+          queryClient.invalidateQueries({
+            queryKey: ['open-orders'],
+          }),
         ])
         setConfirmation(undefined)
       }

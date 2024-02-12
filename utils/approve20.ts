@@ -1,5 +1,3 @@
-import { GetWalletClientResult } from '@wagmi/core'
-
 import { Currency } from '../model/currency'
 import { CHAIN_IDS } from '../constants/chain'
 import { fetchAllowance } from '../apis/allowance'
@@ -7,7 +5,7 @@ import { ERC20_PERMIT_ABI } from '../abis/@openzeppelin/erc20-permit-abi'
 
 export const approve20 = async (
   chainId: CHAIN_IDS,
-  walletClient: GetWalletClientResult,
+  walletClient: any,
   currency: Currency,
   owner: `0x${string}`,
   spender: `0x${string}`,
